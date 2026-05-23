@@ -36,7 +36,11 @@ yarn
 yarn build
 ```
 
-### 2. Copy to install location
+---
+
+### macOS
+
+**Copy to install location:**
 
 ```bash
 INSTALL_DIR="$HOME/Library/Application Support/Claude/mcp/ms-office-doc-reader"
@@ -47,26 +51,16 @@ cd "$INSTALL_DIR"
 yarn install --production
 ```
 
-### 3. Register with Claude Code
+**Register with Claude Code:**
 
 ```bash
 claude mcp add --scope user ms-office-doc-reader $(which node) \
   "$HOME/Library/Application Support/Claude/mcp/ms-office-doc-reader/dist/index.js"
 ```
 
-> **Note:** Use the full path to `node` (e.g. `/opt/homebrew/bin/node` on Apple Silicon Macs with Homebrew). Claude Code does not inherit your shell PATH.
+> Use the full path to `node` — e.g. `/opt/homebrew/bin/node` on Apple Silicon with Homebrew. Claude Code does not inherit your shell PATH.
 
-Verify the server is connected:
-
-```bash
-claude mcp list
-```
-
-You should see `ms-office-doc-reader: ... ✓ Connected`.
-
-### Claude Desktop
-
-If you use [Claude Desktop](https://claude.ai/download) instead of Claude Code, add the following to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+**Claude Desktop** — add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
@@ -81,15 +75,116 @@ If you use [Claude Desktop](https://claude.ai/download) instead of Claude Code, 
 }
 ```
 
-Replace `YOUR_USERNAME` with your macOS username and adjust the `node` path if needed (`which node`). Restart Claude Desktop after saving the file.
+Replace `YOUR_USERNAME` with your macOS username and adjust the `node` path if needed (`which node`). Restart Claude Desktop after saving.
+
+---
+
+### Linux
+
+**Copy to install location:**
+
+```bash
+INSTALL_DIR="$HOME/.local/share/claude/mcp/ms-office-doc-reader"
+mkdir -p "$INSTALL_DIR"
+cp -r dist "$INSTALL_DIR/"
+cp package.json "$INSTALL_DIR/"
+cd "$INSTALL_DIR"
+yarn install --production
+```
+
+**Register with Claude Code:**
+
+```bash
+claude mcp add --scope user ms-office-doc-reader $(which node) \
+  "$HOME/.local/share/claude/mcp/ms-office-doc-reader/dist/index.js"
+```
+
+**Claude Desktop** — add to `~/.config/Claude/claude_desktop_config.json` (create the file if it does not exist):
+
+```json
+{
+  "mcpServers": {
+    "ms-office-doc-reader": {
+      "command": "/usr/bin/node",
+      "args": [
+        "/home/YOUR_USERNAME/.local/share/claude/mcp/ms-office-doc-reader/dist/index.js"
+      ]
+    }
+  }
+}
+```
+
+Replace `YOUR_USERNAME` with your Linux username and adjust the `node` path if needed (`which node`). Restart Claude Desktop after saving.
+
+---
+
+### Windows
+
+Run the following commands in **PowerShell**.
+
+**Copy to install location:**
+
+```powershell
+$InstallDir = "$env:APPDATA\Claude\mcp\ms-office-doc-reader"
+New-Item -ItemType Directory -Force -Path $InstallDir
+Copy-Item -Recurse dist $InstallDir
+Copy-Item package.json $InstallDir
+Set-Location $InstallDir
+yarn install --production
+```
+
+**Register with Claude Code:**
+
+```powershell
+$NodePath = (Get-Command node).Source
+$ServerPath = "$env:APPDATA\Claude\mcp\ms-office-doc-reader\dist\index.js"
+claude mcp add --scope user ms-office-doc-reader $NodePath $ServerPath
+```
+
+**Claude Desktop** — add to `%APPDATA%\Claude\claude_desktop_config.json` (create the file if it does not exist):
+
+```json
+{
+  "mcpServers": {
+    "ms-office-doc-reader": {
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\YOUR_USERNAME\\AppData\\Roaming\\Claude\\mcp\\ms-office-doc-reader\\dist\\index.js"
+      ]
+    }
+  }
+}
+```
+
+Replace `YOUR_USERNAME` with your Windows username and adjust the `node.exe` path if needed (`(Get-Command node).Source`). Restart Claude Desktop after saving.
+
+---
+
+**Verify the connection (all platforms):**
+
+```bash
+claude mcp list
+```
+
+You should see `ms-office-doc-reader: ... ✓ Connected`.
 
 ## Updating
 
-After pulling new changes:
+After pulling new changes, rebuild and copy the updated `dist/` folder to the install location.
+
+**macOS / Linux:**
 
 ```bash
 yarn build
 cp -r dist "$HOME/Library/Application Support/Claude/mcp/ms-office-doc-reader/"
+# Linux: cp -r dist "$HOME/.local/share/claude/mcp/ms-office-doc-reader/"
+```
+
+**Windows (PowerShell):**
+
+```powershell
+yarn build
+Copy-Item -Recurse -Force dist "$env:APPDATA\Claude\mcp\ms-office-doc-reader"
 ```
 
 Then restart your MCP client.
